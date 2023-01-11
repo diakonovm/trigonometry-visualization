@@ -1,55 +1,73 @@
-const canvas = document.getElementById("chart");
-const ctx = canvas.getContext('2d')
-const offset = {
-  x: canvas.width / 2,
-  y: canvas.width / 2 
+const chart = document.getElementById("chart");
+const chartContext = chart.getContext('2d')
+const chartOffset = {
+  x: chart.width / 2,
+  y: chart.height / 2 
+}
+
+const graph = document.getElementById("graph")
+const graphContext = graph.getContext('2d')
+const graphOffset = {
+  x: graph.width / 2,
+  y: graph.height / 2
 }
 
 const A = { x: 0, y: 0 }
 const B = { x: 0, y: 0 }
 const C = { x: 0, y: 0 }
 
-init()
+setup()
 
-function init() {
-  ctx.translate(offset.x, offset.y)
-  layoutCoordinateSystem(ctx, offset)
+function setup() {
+  // NOTE: Chart
+  chartContext.translate(chartOffset.x, chartOffset.y)
+  layoutCoordinateSystem(chartContext, chartOffset)
 
-  canvas.onmousemove = (event) => {
-    B.x = event.offsetX - offset.x
-    B.y = event.offsetY - offset.y
+  chart.onmousemove = (event) => {
+    B.x = event.offsetX - chartOffset.x
+    B.y = event.offsetY - chartOffset.y
   
     C.x = B.x
   
     update()
   }
+
+  // NOTE: Graph
+  graphContext.translate(graphOffset.x, graphOffset.y)
+  layoutCoordinateSystem(graphContext, graphOffset)
 }
 
 function update() {
-  ctx.clearRect(-offset.x, -offset.y, canvas.width, canvas.height)
-  layoutCoordinateSystem(ctx, offset)
+  // NOTE: Chart
+  chartContext.clearRect(-chartOffset.x, -chartOffset.y, chart.width, chart.height)
+  layoutCoordinateSystem(chartContext, chartOffset)
 
-  drawPoint(ctx, 10, A)
-  drawPoint(ctx, 10, B)
-  drawPoint(ctx, 10, C)
+  drawPoint(chartContext, 10, A)
+  drawPoint(chartContext, 10, B)
+  drawPoint(chartContext, 10, C)
 
-  drawText(ctx, 'A', A)
-  drawText(ctx, 'B', B)
-  drawText(ctx, 'C', C)
+  drawText(chartContext, 'A', A)
+  drawText(chartContext, 'B', B)
+  drawText(chartContext, 'C', C)
 
-  drawLine(ctx, C, B)
-  drawLine(ctx, C, A)
-  drawLine(ctx, A, B)
+  drawLine(chartContext, C, B, 'red')
+  drawLine(chartContext, C, A, 'blue')
+  drawLine(chartContext, A, B)
 
   const sin = distance(C, B) / distance(A, B)
   const cos = distance(A, C) / distance(A, B)
+  const tan = sin / cos
+
   const rad = Math.asin(sin)
   const deg = rad * 180 / Math.PI
   
+  drawText(chartContext, `sin: ${sin.toFixed(3)}`, { x: chart.width / 4, y: chart.height / 4 }, 'red')
+  drawText(chartContext, `cos: ${cos.toFixed(3)}`, { x: chart.width / 4, y: chart.height / 4 + 25 }, 'blue')
+  drawText(chartContext, `tan: ${tan.toFixed(3)}`, { x: chart.width / 4, y: chart.height / 4 + 50 })
+  drawText(chartContext, `deg/rad: ${deg.toFixed(0).toString().padStart(2)}/${rad.toFixed(2)}`, { x: chart.width / 4, y: chart.height / 4 + 75 })
 
-  drawText(ctx, `sin: ${sin.toFixed(3)}`, { x: canvas.width / 4, y: canvas.height / 4 }, 'red')
-  drawText(ctx, `cos: ${cos.toFixed(3)}`, { x: canvas.width / 4, y: canvas.height / 4 + 25 }, 'blue')
-  drawText(ctx, `deg/rad: ${deg.toFixed(0).toString().padStart(2)}/${rad.toFixed(2)}`, { x: canvas.width / 4, y: canvas.height / 4 + 50 })
+  // NOTE: Graph
+  
 }
 
 /**
@@ -106,7 +124,7 @@ function drawText(context, text, p, color = 'black') {
   context.fillStyle = color
   context.textAlign = "center"
   context.textBaseline = "middle"
-  context.font = "bold 18px Courier"
+  context.font = "bold 14px Courier"
   context.strokeStyle = "white"
   context.lineWidth = 7
   context.strokeText(text, p.x, p.y)
@@ -131,9 +149,7 @@ function layoutCoordinateSystem(context, offset) {
   
   context.stroke()
 
-  context.setLineDash([])  
-
-  drawPoint(context, 10, { x: 0, y: 0 })
+  context.setLineDash([])
 }
 
 
